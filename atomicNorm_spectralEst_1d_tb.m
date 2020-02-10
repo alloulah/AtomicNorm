@@ -1,11 +1,11 @@
 %
-% 1-dimensional Spectal Estimation via Atomic Norm
+% 1-Dimensional Spectal Estimation via Atomic Norm
 %
-% Based on
+% Reference:
 %     Bhaskar, Badri Narayan, Gongguo Tang, and Benjamin Recht. "Atomic  
 %     norm denoising with applications to line spectral estimation." 
 %     IEEE Transactions on Signal Processing 61.23 (2013): 5987-5999.
-%     https://arxiv.org/pdf/1204.0562
+%     arXiv:1204.0562
 %
 % Author: Mo Alloulah
 % Date: 070220
@@ -55,26 +55,26 @@ Z = toeplitz(u);
 
 H = [Z x_est;x_est' t];
 
-minimize(sum_square_abs(y-x_est)/2 + (tau/2)*(real(trace(Z))/N + t))
+minimize(sum_square_abs(y-x_est)/2 + (tau/2)*(real(trace(Z)) + t))
 subject to
 H == hermitian_semidefinite(N+1)
 
 cvx_end
 
 % dual solution
-z_hat = y - x_est;
+x_hat = y - x_est;
 
 %% Localise Frequencies
 
 % discrete set of Atoms (Fourier)
 A = zeros(N, N);
 for f = -N/2:N/2-1
-    A(:, 1+f+N/2) = exp(-1i*2*pi*f*[0:N-1].'/N); 
+    A(:, 1+f+N/2) = exp(1i*2*pi*f*[0:N-1].'/N); 
 end
-spectr_an = z_hat.'*A;
+spectr_an = x_hat'*A;
 
 % should be also equivalent to FFT
-spectr_fft = fftshift(fft(z_hat));
+spectr_fft = fftshift(fft(x_hat));
 figure();
 hold on
 plot( t_f, 20*log10( abs(spectr_an) ) )
