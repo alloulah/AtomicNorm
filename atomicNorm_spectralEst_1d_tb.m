@@ -20,13 +20,23 @@ clc
 
 N = 256;
 
+sigmaSnr_dB = 40;
+
 nn = [0:N-1].';
 f = [-36 5 15];
-s = sum(exp(1i*2*pi*f.*nn/N), 2)/sqrt(N*length(f));
+s = sum(exp(1i*2*pi*f.*nn/N), 2);
 
+% normalise power level as required
+normPwr_dB = 0;
+pwr_dB = 10*log10(s'*s/length(s));
+sigScale = sqrt(10^(-(pwr_dB-normPwr_dB)/10));
+s = sigScale * s;
+sigPwr_dB = 10*log10(s'*s/length(s));
 % add Gaussian white noise - SNR [dB]
-sigmaSnr_dB = 40;
-s = s + 10^(-sigmaSnr_dB/20)*(randn(size(s)) + 1i*randn(size(s)))/sqrt(2);
+n_awgn = 10^(-sigmaSnr_dB/20)*(randn(size(s)) + 1i*randn(size(s)))/sqrt(2);
+noisePwr_dB = 10*log10(n_awgn'*n_awgn/length(n_awgn));
+s = s + n_awgn;
+fprintf('SNR = %2.3f (dB)\n', sigPwr_dB-noisePwr_dB);
 
 % inspect Fourier spectrum
 t_f = nn - N/2;
